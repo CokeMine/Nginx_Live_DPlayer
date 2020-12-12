@@ -37,7 +37,7 @@ install_nginx() {
   cd nginx-${nginx_ver}/ || exit 1
   git clone https://github.com/winshining/nginx-http-flv-module.git
   apt build-dep nginx -y
-  ./configure --prefix=/usr/local/nginx --with-http_stub_status_module --with-http_ssl_module --with-file-aio --with-http_realip_module --add-module=./nginx-http-flv-module
+  ./configure --prefix=/usr/local/nginx --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --add-module=./nginx-http-flv-module
   make && make install
   ln -s /usr/local/nginx/sbin/nginx /usr/sbin/nginx
   cat >"/lib/systemd/system/nginx.service" <<-EOF
@@ -64,13 +64,12 @@ config_nginx() {
   mkdir -p /data/wwwroot/public
   mkdir -p /data/wwwroot/wwwlogs
   cp /usr/local/nginx/html/* /data/wwwroot/default
-  mkdir /usr/local/nginx/vhost
-  mkdir /usr/local/nginx/ssl
-  wget https://raw.githubusercontent.com/CokeMine/Nginx_rtmp_live/main/config/nginx.conf -O /usr/local/nginx/nginx.conf
-  wget https://raw.githubusercontent.com/CokeMine/Nginx_rtmp_live/main/config/rtmp.conf -O /usr/local/nginx/rtmp.conf
-  wget https://raw.githubusercontent.com/CokeMine/Nginx_rtmp_live/main/config/hls.conf -O /usr/local/nginx/vhost/hls.conf
+  mkdir /usr/local/nginx/conf/vhost
+  mkdir /usr/local/nginx/conf/ssl
+  wget https://raw.githubusercontent.com/CokeMine/Nginx_rtmp_live/main/config/nginx.conf -O /usr/local/nginx/conf/nginx.conf
+  wget https://raw.githubusercontent.com/CokeMine/Nginx_rtmp_live/main/config/rtmp.conf -O /usr/local/nginx/conf/rtmp.conf
+  wget https://raw.githubusercontent.com/CokeMine/Nginx_rtmp_live/main/config/hls.conf -O /usr/local/nginx/conf/vhost/hls.conf
   wget https://raw.githubusercontent.com/CokeMine/Nginx_rtmp_live/main/public/index.html -P /data/wwwroot/public
-  systemctl restart nginx.service
   systemctl daemon-reload
   systemctl start nginx.service
   systemctl enable nginx.service
