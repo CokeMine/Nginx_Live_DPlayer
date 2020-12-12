@@ -62,14 +62,14 @@ EOF
 config_nginx() {
   mkdir -p /data/wwwroot/default
   mkdir -p /data/wwwroot/public
-  mkdir -p /data/wwwroot/wwwlogs
+  mkdir -p /data/wwwlogs
   cp /usr/local/nginx/html/* /data/wwwroot/default
   mkdir /usr/local/nginx/conf/vhost
   mkdir /usr/local/nginx/conf/ssl
   wget https://raw.githubusercontent.com/CokeMine/Nginx_rtmp_live/main/config/nginx.conf -O /usr/local/nginx/conf/nginx.conf
   wget https://raw.githubusercontent.com/CokeMine/Nginx_rtmp_live/main/config/rtmp.conf -O /usr/local/nginx/conf/rtmp.conf
   wget https://raw.githubusercontent.com/CokeMine/Nginx_rtmp_live/main/config/hls.conf -O /usr/local/nginx/conf/vhost/hls.conf
-  wget https://raw.githubusercontent.com/CokeMine/Nginx_rtmp_live/main/public/index.html -P /data/wwwroot/public
+  wget https://raw.githubusercontent.com/CokeMine/Nginx_rtmp_live/main/public/index.html -O /data/wwwroot/public/index.html
   systemctl daemon-reload
   systemctl start nginx.service
   systemctl enable nginx.service
@@ -88,7 +88,7 @@ main() {
   fi
   config_nginx
   read -rp "Nginx配置完成，请输入你的域名:" domain
-  sed -e "s/live.com/${domain}/g" /usr/local/nginx/vhost/hls.conf
+  sed -i "s/live.com/${domain}/g" /usr/local/nginx/conf/vhost/hls.conf
   systemctl restart nginx.service
 }
 main
