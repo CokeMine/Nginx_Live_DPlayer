@@ -1,4 +1,4 @@
-<html>
+<html lang="zh">
 
 <head>
     <meta charset="utf-8">
@@ -79,11 +79,31 @@
         const dp = new DPlayer({
             container: container,
             live: true,
+            danmaku: true,
             video: {
                 url: 'hls/main.m3u8',
                 type: 'hls',
             },
+            apiBackend:createApiBackend('ws://127.0.0.1:8765',function (data) {
+                //console.log(data);
+                dp.danmaku.draw(data);
+            }),
         });
+
+        function createApiBackend(url, callback) {
+            ws = new WebSocket(url);
+            ws.onmessage = (e) => callback(JSON.parse(e.data));
+            return {
+                read: function (options) {
+                    ws.onerror = (e) => console.log(e);
+                    options.success();
+                },
+                send:function (options) {
+                    ws.send(JSON.stringify(options.data));
+                    options.success();
+                }
+            }
+        }
     </script>
 </footer>
 
