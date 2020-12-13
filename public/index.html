@@ -2,17 +2,82 @@
 
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotaru Live</title>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/tocas-ui/dist/tocas.css">
+    <style>
+        #menu a, #menu div {
+            font-size: 1.5rem;
+            color: #ee6e73;
+        }
+
+        #menu {
+            margin-bottom: 2rem;
+        }
+
+        @media only screen and (max-width: 992px) {
+            html {
+                font-size: 14px;
+            }
+        }
+
+        @media only screen and (max-width: 720px) {
+            html {
+                font-size: 12px;
+            }
+        }
+
+        @media only screen and (max-width: 600px) {
+            html {
+                font-size: 10px;
+            }
+        }
+
+        @media only screen and (max-width: 555px) {
+            html {
+                font-size: 10px;
+            }
+        }
+
+        @media only screen and (max-width: 450px) {
+            html {
+                font-size: 8px;
+            }
+        }
+
+        @media only screen and (max-width: 360px) {
+            html {
+                font-size: 6px;
+            }
+        }
+    </style>
 </head>
 
 <body>
-<div id="dplayer"></div>
+<div class="ts fluid container">
+    <div class="ts borderless large menu" id="menu">
+        <div class="ts narrow container">
+            <div class="header item">Hotaru Live</div>
+            <a href="#" class="item">首頁</a>
+            <a href="https://github.com/CokeMine" class="item right">GitHub</a>
+        </div>
+    </div>
+</div>
+<div class="ts container" id="main">
+    <div id="dplayer"></div>
+</div>
 </body>
 <footer>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@0.14.17/dist/hls.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dplayer@1.26.0/dist/DPlayer.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/hls.js/dist/hls.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
     <script>
+        let container = document.getElementById('dplayer');
+        container.style.height = container.clientWidth * 0.5625;
+        window.onresize = function () {
+            container.style.height = container.clientWidth * 0.5625;
+        }
         const dp = new DPlayer({
-            container: document.getElementById('dplayer'),
+            container: container,
             live: true,
             video: {
                 url: 'hls/main.m3u8',
