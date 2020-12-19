@@ -2,7 +2,7 @@
 #=================================================
 #	System Required: Debian/Ubuntu
 #	Description: Install Nginx with Rtmp module
-#	Version: Test v0.1
+#	Version: v0.1
 #	Author: APTX
 #=================================================
 sh_ver="0.1"
@@ -34,7 +34,10 @@ install_nginx() {
   apt update && apt install wget curl build-essential git -y
   wget "http://nginx.org/download/nginx-${nginx_ver}.tar.gz" -O "nginx.tar.gz"
   tar -xzf nginx.tar.gz
-  cd nginx-${nginx_ver}/ || exit 1
+  cd nginx-${nginx_ver}/ || (
+    echo "${Error} Nginx下载失败"
+    exit 1
+  )
   git clone https://github.com/winshining/nginx-http-flv-module.git
   apt build-dep nginx -y
   ./configure --prefix=/usr/local/nginx --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --add-module=./nginx-http-flv-module
@@ -79,16 +82,24 @@ main() {
   echo -e "安装Nginx以及RTMP模块脚本 ${Red_font_prefix}[v${sh_ver}]${Font_color_suffix}"
   check_sys
   if [[ ${release} == "centos" ]]; then
-    echo -e "本脚本只支援Debian/Ubuntu系统!"
+    echo -e "${Error} 本脚本只支援Debian/Ubuntu系统!"
     exit 1
   fi
   install_nginx
   if ! nginx -V >/dev/null 2>&1; then
-    echo -e "Nginx 安装失败！"
+    echo -e "${Error} Nginx 安装失败！"
   fi
   config_nginx
-  read -rp "Nginx配置完成，请输入你的域名:" domain
+  read -rp "${Info} Nginx配置完成，请输入你的域名:" domain
+  read -rp "${Info} 请输入用作弹幕的Websocket后端端口(默认为):8765" port
+  [[ -z "${port}" ]] && port="8765"
   sed -i "s/live.com/${domain}/g" /usr/local/nginx/conf/vhost/hls.conf
+  sed -i "s/localhost/${domain}/g" /data/wwwroot/public/index.html
+  sed -i "s/8765/${port}/g" /data/wwwroot/public/index.html
   systemctl restart nginx.service
+  echo -e "${Info} Nginx_Live_DPlayer安装完成"
+  echo && echo -e "\t================================================"
+  echo -e "\t你设置的域名为: ${Red_background_prefix}domain${Font_color_suffix}"
+  echo -e "\t================================================" && echo
 }
 main
