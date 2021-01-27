@@ -39,33 +39,39 @@
             margin-right: 0;
             float: right;
         }
+
         #dplayer {
             height: 0;
             margin-top: 0.625rem;
             position: relative;
             padding-bottom: 675px;
         }
+
         #dplayer > * {
             position: absolute;
         }
     </style>
     <style>
+        /* Responsive */
         @media only screen and (max-width: 1210px) {
             #nav-ul {
                 margin: 0 0.625rem;
                 width: auto;
             }
+
             #dplayer {
                 margin: 0.625rem 0.625rem 0 0.625rem;
                 padding-bottom: 56.25%;
                 width: auto;
             }
         }
+
         @media only screen and (max-width: 500px) {
             html {
                 font-size: 14px;
             }
         }
+
         @media only screen and (max-width: 360px) {
             html {
                 font-size: 12px;
@@ -86,6 +92,7 @@
 </body>
 <footer>
     <script src="//cdn.jsdelivr.net/npm/hls.js/dist/hls.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/socket.io/client-dist/socket.io.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/dplayer/dist/DPlayer.min.js"></script>
     <script>
         const dp = new DPlayer({
@@ -96,22 +103,24 @@
                 url: 'hls/main.m3u8',
                 type: 'hls',
             },
-            apiBackend: createApiBackend('ws://localhost:8765', function (data) {
-                //console.log(data);
+            apiBackend: createApiBackend(`${window.location.host}`, (data) => {
+                console.log(data);
                 dp.danmaku.draw(data);
             }),
         });
 
         function createApiBackend(url, callback) {
-            const ws = new WebSocket(url);
-            ws.onmessage = (e) => callback(JSON.parse(e.data));
+            const socket = io(url);
+            socket.on("connect", () => console.log("Backend Server Connect Success!"));
+            socket.on("connect_failed", () => console.log("Backend Server Connect Failed! Please Check!"));
+            socket.emit("joinRoom", "default");
+            socket.on("subscribe", data => callback(JSON.parse(data)));
             return {
-                read: function (options) {
-                    ws.onerror = (e) => console.log(e);
+                read(options) {
                     options.success();
                 },
-                send: function (options) {
-                    ws.send(JSON.stringify(options.data));
+                send(options) {
+                    socket.emit("pushMessage", JSON.stringify(options.data));
                     options.success();
                 }
             }

@@ -31,7 +31,6 @@ check_sys() {
 }
 install_nginx() {
   cd /tmp || mkdir /tmp
-  apt update && apt install wget curl build-essential git -y
   wget "http://nginx.org/download/nginx-${nginx_ver}.tar.gz" -O "nginx.tar.gz"
   tar -xzf nginx.tar.gz
   cd nginx-${nginx_ver}/ || (
@@ -69,10 +68,7 @@ config_nginx() {
   cp /usr/local/nginx/html/* /data/wwwroot/default
   mkdir /usr/local/nginx/conf/vhost
   mkdir /usr/local/nginx/conf/ssl
-  wget https://raw.githubusercontent.com/CokeMine/Nginx_rtmp_live/main/config/nginx.conf -O /usr/local/nginx/conf/nginx.conf
-  wget https://raw.githubusercontent.com/CokeMine/Nginx_rtmp_live/main/config/rtmp.conf -O /usr/local/nginx/conf/rtmp.conf
-  wget https://raw.githubusercontent.com/CokeMine/Nginx_rtmp_live/main/config/hls.conf -O /usr/local/nginx/conf/vhost/hls.conf
-  wget https://raw.githubusercontent.com/CokeMine/Nginx_rtmp_live/main/public/index.html -O /data/wwwroot/public/index.html
+  mv -f Nginx_Live/config/* /usr/local/nginx/conf/
   systemctl daemon-reload
   systemctl start nginx.service
   systemctl enable nginx.service
@@ -85,21 +81,23 @@ main() {
     echo -e "${Error} 本脚本只支援Debian/Ubuntu系统!"
     exit 1
   fi
+  apt update && apt install wget curl build-essential git unzip -y
+  curl -sL https://deb.nodesource.com/setup_14.x | bash # Install Node.js
+  wget "https://github.com/CokeMine/Nginx_Live_DPlayer/archive/node.zip" -O nginx_live.zip
+  unzip nginx_live.zip
+  mv Nginx_Live_DPlayer-main Nginx_Live
+  read -rp "${Info} 请输入你需要配置的域名:" domain
   install_nginx
   if ! nginx -V >/dev/null 2>&1; then
     echo -e "${Error} Nginx 安装失败！"
+    exit 1
   fi
   config_nginx
-  read -rp "${Info} Nginx配置完成，请输入你的域名:" domain
-  read -rp "${Info} 请输入用作弹幕的Websocket后端端口(默认为):8765" port
-  [[ -z "${port}" ]] && port="8765"
-  sed -i "s/live.com/${domain}/g" /usr/local/nginx/conf/vhost/hls.conf
-  sed -i "s/localhost/${domain}/g" /data/wwwroot/public/index.html
-  sed -i "s/8765/${port}/g" /data/wwwroot/public/index.html
+  sed -i "s/yourdomain.com/${domain}/g" "/usr/local/nginx/conf/vhost/site_config.conf"
   systemctl restart nginx.service
+  cd Nginx_Live/server || exit 1
+  npm install
+  npm run start &
   echo -e "${Info} Nginx_Live_DPlayer安装完成"
-  echo && echo -e "\t================================================"
-  echo -e "\t你设置的域名为: ${Red_background_prefix}domain${Font_color_suffix}"
-  echo -e "\t================================================" && echo
 }
 main
