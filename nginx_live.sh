@@ -85,7 +85,7 @@ main() {
   curl -sL https://deb.nodesource.com/setup_14.x | bash # Install Node.js
   wget "https://github.com/CokeMine/Nginx_Live_DPlayer/archive/node.zip" -O nginx_live.zip
   unzip nginx_live.zip
-  mv Nginx_Live_DPlayer-main Nginx_Live
+  mv Nginx_Live_DPlayer-node Nginx_Live
   read -rp "${Info} 请输入你需要配置的域名:" domain
   install_nginx
   if ! nginx -V >/dev/null 2>&1; then
